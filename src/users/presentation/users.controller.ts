@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { AddRoleToUserDto } from './dto/add-role-to-user.dto';
@@ -22,7 +23,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  me(@CurrentUser() userId: string): Promise<User | null> {
+  me(@Req() req: Request): Promise<User | null> {
+    const userId = (req['user'] as { id: string }).id;
+    
     return this.usersService.me(userId);
   }
 
