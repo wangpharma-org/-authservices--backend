@@ -1,5 +1,4 @@
 import {
-  Body,
   HttpStatus,
   Inject,
   Injectable,
@@ -14,6 +13,7 @@ import { AUTH_REPOSITORY } from '../domain/ports/auth.repository.interface';
 import type { IAuthRepository } from '../domain/ports/auth.repository.interface';
 import { HashService } from '../../common/services/hash.service';
 import { UsersService } from '../../users/application/users.service';
+import { generateAccessToken, generateTokens } from 'src/common/utils/genrateToken.util';
 
 @Injectable()
 export class AuthService {
@@ -27,18 +27,7 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<LoginResponseDto> {
     const user = await this.usersService.createUser(registerDto);
     
-    const userInfo = {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      approved: user.approved,
-    }
-
-    const accessToken = await this.jwtService.signAsync(userInfo, { expiresIn: '15m' });
-    const refreshToken = await this.jwtService.signAsync(userInfo, { expiresIn: '7d' });
-  
-    return { accessToken, refreshToken };
+    return generateTokens(user, this.jwtService);
   }
 
   async validateLogin(loginDto: AuthEmailLoginDto): Promise<LoginResponseDto> {
@@ -68,18 +57,9 @@ export class AuthService {
       lastLogin: new Date(),
     });
 
-    const userInfo = {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      approved: user.approved,
-    }
-
-    const accessToken = await this.jwtService.signAsync(userInfo);
-
+    const result = await generateTokens(user, this.jwtService);
     
-    return { accessToken, refreshToken: null   };
+    return result;
   }
 
   async logout(userId: string): Promise<void> {
@@ -104,7 +84,7 @@ export class AuthService {
     });
   }
 
-  async refresh(token: string): Promise<LoginResponseDto['accessToken']> {
+  async refresh(token: string): Promise<{ accessToken: LoginResponseDto['accessToken'] }> {
     try {
       const payload = this.jwtService.verify(token);
       const user = await this.usersService.findById(payload.sub);
@@ -116,16 +96,10 @@ export class AuthService {
         });
       }
 
-      const userInfo = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        approved: user.approved,
-      };
 
-      const accessToken = await this.jwtService.signAsync(userInfo, { expiresIn: '15m' });
-      return accessToken;
+      const accessToken = await generateAccessToken(user, this.jwtService);
+      
+      return { accessToken };
     } catch (error) {
       throw new UnauthorizedException({
         status: HttpStatus.UNAUTHORIZED,
