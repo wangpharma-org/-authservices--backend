@@ -1,8 +1,6 @@
 import {
   Body,
   Controller,
-  HttpCode,
-  HttpStatus,
   Post,
   Req,
 } from '@nestjs/common';
@@ -33,8 +31,6 @@ export class AuthController {
     return this.authService.validateLogin(loginDto);
   }
 
-
-  @Public()
   @ApiOkResponse({ description: 'Logged out successfully' })
   @Post('logout')
   logout(@Req() req: Request): Promise<void> {
@@ -45,7 +41,7 @@ export class AuthController {
   @Public()
   @ApiOkResponse({ type: LoginResponseDto })
   @Post('refresh')
-  refresh(@Body('refreshToken') token: string): Promise<LoginResponseDto['accessToken']> {
-    return this.authService.refresh(token);
+  refresh(@Body('refreshToken') refreshToken: string): Promise<{ accessToken: LoginResponseDto['accessToken'] }> {
+    return this.authService.refresh(refreshToken);
   }
 }
