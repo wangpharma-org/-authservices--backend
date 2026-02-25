@@ -9,23 +9,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { getTypeOrmConfig } from './common/config/database.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'myuser',
-      password: 'mypassword',
-      database: 'authdb',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-      synchronize: false,
-    }),
+    TypeOrmModule.forRoot(getTypeOrmConfig()),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
