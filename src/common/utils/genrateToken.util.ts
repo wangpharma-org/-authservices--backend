@@ -30,7 +30,7 @@ export function generateAccessToken(
 ): Promise<string> {    
     const payload = buildPayload(user);
 
-    return jwtService.signAsync(payload, { expiresIn: '1m' });
+    return jwtService.signAsync(payload, { expiresIn: '15m' });
 }
 
 export function generateRefreshToken(
@@ -39,5 +39,5 @@ export function generateRefreshToken(
 ): Promise<string> {
     
     const payload = buildPayload(user);
-    return jwtService.signAsync(payload, { expiresIn: '1m' });
+    return jwtService.signAsync(payload, { expiresIn: '7d' });
 }
