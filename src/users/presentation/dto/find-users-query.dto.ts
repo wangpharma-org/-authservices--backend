@@ -2,7 +2,6 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsEmail,
   IsInt,
   IsOptional,
   IsString,
@@ -10,22 +9,15 @@ import {
 } from 'class-validator';
 
 export class FindUsersQueryDto {
-  @ApiPropertyOptional({ example: 'user@example.com' })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({ example: 'John' })
+  @ApiPropertyOptional({ 
+    example: 'john', 
+    description: 'Search term that will be matched against email, firstName, and lastName' 
+  })
   @IsOptional()
   @IsString()
-  firstName?: string;
+  search?: string;
 
-  @ApiPropertyOptional({ example: 'Doe' })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
-
-  @ApiPropertyOptional({ example: true })
+  @ApiPropertyOptional({ example: true, description: 'Filter by user active status' })
   @IsOptional()
   @Transform(
     ({ value }: { value: unknown }) => value === 'true' || value === true,

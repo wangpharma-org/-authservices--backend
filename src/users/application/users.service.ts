@@ -11,7 +11,7 @@ import { Role } from '../../roles/domain/role.entity';
 import { CreateUserDto } from '../presentation/dto/create-user.dto';
 import { UpdateUserDto } from '../presentation/dto/update-user.dto';
 import { FindUsersQueryDto } from '../presentation/dto/find-users-query.dto';
-import { buildFilterOptions } from '../../common/utils/filter.util';
+import { buildCombinedSearchOptions } from '../../common/utils/search.util';
 import {
   buildPaginationMeta,
   buildPaginationOptions,
@@ -117,9 +117,16 @@ export class UsersService {
   async findUserAll(
     query: FindUsersQueryDto,
   ): Promise<{ data: User[]; meta: PaginationMeta }> {
-    const { page, limit, ...filters } = query;
+    const { page, limit, search, ...filters } = query;
 
-    const where = buildFilterOptions<User>(filters as Record<string, unknown>);
+    const searchableFields: (keyof User)[] = ['firstName', 'lastName', 'email'];
+    
+    const where = buildCombinedSearchOptions<User>(
+      search, 
+      searchableFields, 
+      filters as Record<string, unknown>
+    );
+
     const { skip, take } = buildPaginationOptions(page, limit);
 
     const [data, total] = await this.usersRepository.findAndCount({
